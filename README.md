@@ -62,8 +62,10 @@ streamlit run app.py
 ```
 
 <br>
+
+## 실행 결과
 <img width=600 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/027fb39d-d997-40f0-b8ee-0ed399db081c">
 
 
-## 실행 결과
+
 
