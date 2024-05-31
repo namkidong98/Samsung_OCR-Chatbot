@@ -19,3 +19,51 @@
         4. 결과 보고서(PPT) : 서비스 및 기능 소개, UI 시연 동영상 및 캡쳐
 
 <br>
+
+## 설치 및 실행 방법
+
+1. Git Clone
+```
+git clone https://github.com/namkidong98/Samsung_OCR-Chatbot.git
+cd Samsung_OCR-Chatbot
+```
+
+2. 가상 환경 설치 및 활성화
+```linux
+conda create -n samsung python=3.10
+conda activate samsung
+```
+
+3. torch 설치
+```linux
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+```
+
+4. 나머지 dependency 설치
+```linux
+pip install -r requirements.txt
+```
+
+5. embed_download.py를 실행하여 local directory에 BGE-M3 Embedding Model 설치
+```
+python embed_download.py
+```
+
+6. Ollama를 실행한 상태에서 llm_rag의 BASE_URL 설정
+```
+# BASE_URL = "http://ollama-container:11434" # Ollama-Docker를 사용한 docker-compose의 경우
+# BASE_URL = "https://f9db-211-184-186-6.ngrok-free.app" # Ngrok으로 Colab 등의 GPU 서버에서 Ollama를 구동한 경우
+BASE_URL = "https://localhost:11434" # Local에서 Ollama를 구동한 경우
+```
+
+7. streamlit 실행
+```linux
+streamlit run app.py
+```
+
+<br>
+<img width=600 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/027fb39d-d997-40f0-b8ee-0ed399db081c">
+
+
+## 실행 결과
+
