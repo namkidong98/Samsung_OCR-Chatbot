@@ -20,6 +20,11 @@
 
 <br>
 
+## Pipeline
+<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/a1b28006-2f16-4f35-b2ce-99c9cc86d139">
+
+<br><br>
+
 ## 설치 및 실행 방법
 
 1. Git Clone
