@@ -25,6 +25,16 @@
 
 <br><br>
 
+## 실행 결과
+<img width=600 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/66fe29c8-55c3-4ca7-9f8d-72e799cbb56a">
+
+<br><br>
+
+## 시연 영상
+https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/7a8d697c-371b-491b-b8be-9fce3030795d
+
+<br><br>
+
 ## 설치 및 실행 방법
 
 1. Git Clone
@@ -65,11 +75,6 @@ BASE_URL = "https://localhost:11434" # Local에서 Ollama를 구동한 경우
 ```linux
 streamlit run app.py
 ```
-
-<br>
-
-## 실행 결과
-<img width=600 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/027fb39d-d997-40f0-b8ee-0ed399db081c">
 
 
 
