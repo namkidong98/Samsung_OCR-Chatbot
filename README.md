@@ -77,6 +77,74 @@ BASE_URL = "https://localhost:11434" # Local에서 Ollama를 구동한 경우
 streamlit run app.py
 ```
 
+<br>
 
+## Docker-Compose로 실행
 
+```
+docker login
+docker-compose up # docker-compose.yml이 있는 폴더에서
+```
+<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/f142cbfe-7f23-4171-877d-061d801ad2b4">
+<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/65288edc-add7-4b3d-ae12-398b9cca334e">
+<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/93bf3a5c-923a-423b-aa73-d25f7d2db6bd">
+<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/76f8979a-c9c2-466f-b077-014e62efbd69">
 
+<br><br>
+
+```yml
+version: '3.8'
+services:
+  ollama-container:
+    image: kidong98/ollama-eeve
+    volumes:
+      - ./data/ollama:/root/.ollama
+    ports:
+      - 11434:11434
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /root/.ollama/models/manifests/registry.ollama.ai/library/EEVE-Korean-10.8B/latest || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 100s
+
+  streamlit-app:
+    image: kidong98/samsung-rag
+    ports:
+      - 8501:8501
+    depends_on:
+      ollama-container:
+        condition: service_healthy
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+```
+<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/d8c5fca6-a2dd-4418-971e-97994ddb1095">
+
+- ollama-container와 streamlit-app이라는 두 개의 컨테이너를 docker-compose를 이용하여 동시에 구동하고 관리한다
+- streamlit-app은 ollama-container에서 "ollama create"가 완료되고 난 이후에 작동해야 한다
+    - 이를 구현하기 위해 ollama-container의 healthcheck와 streamlit-app의 depends_on을 사용했다
+    - 1. ollama-container의 healthcheck
+            - ollama-container의 healthcheck에서는 100초 대기하고 30초 간격으로 test의 명령어로 체크하게 된다
+            - ollama create가 성공적으로 완료되면 위 경로에 latest라는 파일이 생성되므로 이러한 파일이 있는지 체크하도록 지시한다
+            - 만약 파일이 존재하지 않으면 || 뒤의 exit 1이 실행되어 healthcheck에서 unhealthy 상태가 된다
+            - 만약 파일이 존재하면 스크립트가 성공적으로 완료되고 exit 0이 반환되며(정상 종료) 이를 healthcheck에서 감지하여 healthy 상태가 된다
+    - 2. streamlit-app의 depends_on
+            - depends_on에 있는 ollama-container가 실행된 이후에 streamlit-app이 실행될 수 있도록 한다
+            - 추가적으로 condition : service_healthy로 설정하여 ollama-container가 조건을 만족하여 healthy 상태가 되기 전까지 기다리게 된다
+            - 이를 통해 streamlit-app은 ollama-container에서 ollama create로 모델이 생성되기를 기다린 이후에 실행될 수 있게 된다
