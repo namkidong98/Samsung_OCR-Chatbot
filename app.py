@@ -44,10 +44,6 @@ set_background(background_path)
 def display_messages():   # 메시지 출력
     st.subheader("Chat")  
     for i, (msg, is_user) in enumerate(st.session_state["messages"]):   # msg에는 입력/응답이 있고 is_user에는 True/False가 있다
-        # if is_user: # 유저의 발화
-        #     message(msg, is_user=is_user, key=str(i), avatar_style='thumbs')   # is_user=True인 경우 유저 입력으로 표시
-        # else: # AI의 발화
-        #     message(msg, is_user=is_user, key=str(i), avatar_style='croodles-neutral')
         if is_user: # 유저의 발화
             with st.chat_message("user", avatar=human_icon_path):
                 st.write(msg)

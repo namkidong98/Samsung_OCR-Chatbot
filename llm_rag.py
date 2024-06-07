@@ -13,11 +13,14 @@ from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
 from typing import List
 from difflib import SequenceMatcher
+import cv2
+from easyocr import Reader
+import numpy as np
 
 USE_BGE_EMBEDDING = True # False이면 FastEmbedding
 LLM_MODEL = "EEVE-Korean-10.8B:latest"
-# BASE_URL = "http://ollama-container:11434"
-BASE_URL = "https://3575-211-184-186-6.ngrok-free.app"
+BASE_URL = "http://ollama-container:11434"
+# BASE_URL = "https://fc6b-211-184-186-6.ngrok-free.app"
 # BASE_URL = "https://localhost:11434"
 
 class ChatBot:
@@ -107,7 +110,31 @@ class ChatBot:
         # )
 
     def image_ingest(self, pdf_file_path: str, pdf_file_name : str):
-        pass
+        reader = Reader(lang_list=['ko', 'en'], gpu=True)
+        text_list, tables_list = self.image_crop_and_ocr(pdf_file_path, reader)
+        docs = [] # Document로 변환하고 저장할 리스트
+        
+        for text in text_list: # 텍스트들은 하나로 통합해서 Document화
+            text = " ".join(text.split('\n'))
+            doc = Document(page_content=text, metadata={'source' : pdf_file_name, 'page' : 1})
+            docs.append(doc)
+        for table in tables_list: # 테이블은 하나씩 Document화
+            table = " ".join(table.split('\n'))
+            doc = Document(page_content=table, metadata={'source' : pdf_file_name, 'page' : 1}) 
+            docs.append(doc)
+        print('-' * 25, 'Document List', '-'*25)
+        for doc in docs:
+            print(doc)
+        print('-' * 50, '\n\n')
+        # VectorStore & Retriever 설정
+        self.vector_store = Chroma.from_documents(documents=docs, embedding=self.embeddings) # 임메딩 벡터 저장소 생성 및 청크 설정
+        self.retriever_embedding = self.vector_store.as_retriever(
+            search_type="similarity", # 유사도 스코어 기반 벡터 검색 설정
+            search_kwargs={"k" :  1},
+        )
+        texts = [doc.page_content for doc in docs]
+        metadata = [doc.metadata for doc in docs]
+        self.retriever_sparse = BM25Retriever.from_texts(texts=texts, metadatas=metadata, k=1) # # BM25Retriever의 검색 결과 개수를 1로 설정
 
     def ask(self, query: str):  # 질문 프롬프트 입력 시 호출
         if not self.vector_store:
@@ -229,6 +256,7 @@ class ChatBot:
                         new_docs.append(Document(page_content=line[boundary-100:], metadata=meta_data))
         return new_docs
 
+    # ------------- ASK에 사용되는 함수들 -------------#
     def result_preprocessing(self, sentence : str) -> str: # 생성된 응답에서 불필요한 부분을 처리하는 함수
         words_to_replace = ['[INST]', '[/INST]', '수정된 질문:', '답변1:', '답변2:', '답변3:', '답변4:']
         for word in words_to_replace:
@@ -253,3 +281,49 @@ class ChatBot:
         if most_similar_index != -1:
             metadata = data[most_similar_index]['metadata']
         return metadata
+    
+    # ------------- Image OCR에 사용되는 함수 -------------#
+    def image_crop_and_ocr(self, path, reader) :
+        # Load image, convert to grayscale, Otsu's threshold
+        image = cv2.imread(path)
+        result = image.copy()
+        gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+        # Detect horizontal lines
+        horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (40,1))
+        detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations=1)
+        cnts = cv2.findContours(detect_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+        for c in cnts:
+            cv2.drawContours(result, [c], -1, (36,255,12), 2)
+
+        connect_lines = []
+        table_ocr_results = []
+        except_table_results = []
+
+        for i in range(len(cnts)-1):
+            for j in range(i+1, len(cnts)) :
+                if ((cnts[i][0][0][0] == cnts[j][0][0][0]) and (cnts[i][1][0][0] == cnts[j][1][0][0])) :
+                    connect = [cnts[i][0][0] , cnts[j][1][0]]
+                    connect_lines.append(connect)
+                    cv2.rectangle(result, cnts[i][0][0],  cnts[j][1][0], (0, 0, 255), -1)
+
+                    rect = [np.array([cnts[i][0][0], cnts[j][1][0]])]
+                    # 사각형 내부 이미지 추출
+                    cropped_image = image[cnts[j][1][0][1]:cnts[i][0][0][1], cnts[i][0][0][0]:cnts[j][1][0][0]]
+                    if (len(cropped_image) != 0 and len(cropped_image[0]) != 0) :
+                        table_results = reader.readtext(cropped_image, detail=0)
+                        rrr = ''
+                        for r in table_results :
+                            r = ''.join(r)
+                            rrr = rrr+'\n'+r
+                            table_ocr_results.append(rrr)
+        results = reader.readtext(result, detail=0)
+        rr = ''
+        for r in results :
+            r = ''.join(r)
+            rr = rr+'\n'+r
+        except_table_results.append(rr)
+
+        ocr_results = [except_table_results, table_ocr_results]
+        return ocr_results

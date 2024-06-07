@@ -9,3 +9,5 @@ chromadb
 transformers
 sentence-transformers
 rank_bm25
+easyocr
+opencv-python-headless
