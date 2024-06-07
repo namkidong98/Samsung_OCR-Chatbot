@@ -6,6 +6,9 @@ services:
       - ./data/ollama:/root/.ollama
     ports:
       - 11434:11434
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
     deploy:
       resources:
         reservations:
@@ -26,6 +29,9 @@ services:
     depends_on:
       ollama-container:
         condition: service_healthy
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
     deploy:
       resources:
         reservations:
