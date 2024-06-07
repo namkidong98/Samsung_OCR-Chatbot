@@ -27,6 +27,7 @@
 
 ## 실행 결과
 <img width=600 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/66fe29c8-55c3-4ca7-9f8d-72e799cbb56a">
+<img width=400 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/d1302495-b028-48b4-bacd-25ae0fe71207">
 
 <br><br>
 
