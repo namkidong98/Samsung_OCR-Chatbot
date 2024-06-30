@@ -13,14 +13,14 @@ from langchain.prompts import PromptTemplate
 from langchain.schema.output_parser import StrOutputParser
 from typing import List
 from difflib import SequenceMatcher
-import cv2
+import cv2, re
 from easyocr import Reader
 import numpy as np
 
 USE_BGE_EMBEDDING = True # False이면 FastEmbedding
 LLM_MODEL = "EEVE-Korean-10.8B:latest"
 BASE_URL = "http://ollama-container:11434"
-# BASE_URL = "https://fc6b-211-184-186-6.ngrok-free.app"
+# BASE_URL = "https://d86c-211-184-186-6.ngrok-free.app"
 # BASE_URL = "https://localhost:11434"
 
 class ChatBot:
@@ -114,13 +114,25 @@ class ChatBot:
         text_list, tables_list = self.image_crop_and_ocr(pdf_file_path, reader)
         docs = [] # Document로 변환하고 저장할 리스트
         
-        for text in text_list: # 텍스트들은 하나로 통합해서 Document화
+        print("Text_list :", text_list)
+        print("Table_list :", tables_list)
+        for text in text_list: # 텍스트들은 하나로 통합해서 Document화(너무 짧으면 버리고 길면 반으로 잘라서 Document화)
             text = " ".join(text.split('\n'))
-            doc = Document(page_content=text, metadata={'source' : pdf_file_name, 'page' : 1})
-            docs.append(doc)
-        for table in tables_list: # 테이블은 하나씩 Document화
+            decision = self.decision_for_Document(text)
+            if decision: # 0이면 일단 버려짐
+                if decision == 1: # 그대로 추가
+                    doc = Document(page_content=text, metadata={'source' : pdf_file_name, 'page' : 1})
+                    docs.append(doc)
+                else:
+                    boundary = len(text) // 2
+                    docs.append(Document(page_content=text[:boundary+100], metadata={'source' : pdf_file_name, 'page' : 1})) # overlap
+                    docs.append(Document(page_content=text[boundary-100:], metadata={'source' : pdf_file_name, 'page' : 1}))
+        table_total = ""
+        for table in tables_list: # 테이블은 하나로 Document화(한 테이블이 분할되는 경우도 있는데 1개의 이미지 파일 정도면 그냥 다 합치는게 나을듯)
             table = " ".join(table.split('\n'))
-            doc = Document(page_content=table, metadata={'source' : pdf_file_name, 'page' : 1}) 
+            table_total += table
+        if table_total.strip() != "":
+            doc = Document(page_content=table_total, metadata={'source' : pdf_file_name, 'page' : 1}) 
             docs.append(doc)
         print('-' * 25, 'Document List', '-'*25)
         for doc in docs:
@@ -147,17 +159,18 @@ class ChatBot:
 
         # Retrieving Documents
         retrieved_docs = [] # Retrieved Documents 중 Unique만 저장
+        
+        print('-' * 25, "Document Retrieved", "-" * 25)
         for query in queryset:
             # docs_ensemble = self.retriever_ensemble.get_relevant_documents(query)
             docs_embedding = self.retriever_embedding.get_relevant_documents(query)
             docs_sparse = self.retriever_sparse.get_relevant_documents(query)
-            print('-' * 25, "Document Retrieved", "-" * 25)
             print("Embedding Based: ", docs_embedding)
             print("BM25 Based :", docs_sparse)
             self.add_unique_document(retrieved_docs, docs_embedding[-1])
             self.add_unique_document(retrieved_docs, docs_sparse[-1])
-            print('-' * 70, '\n')
-        
+        print('-' * 70, '\n')
+
         # Generating Answers
         answer_list = [] # 각 Document 별로 생성한 answer의 목록
         for doc in retrieved_docs: # 각 Document 별로
@@ -261,6 +274,7 @@ class ChatBot:
         words_to_replace = ['[INST]', '[/INST]', '수정된 질문:', '답변1:', '답변2:', '답변3:', '답변4:']
         for word in words_to_replace:
             sentence = sentence.replace(word, "")
+        sentence = re.sub(r"신뢰도\s*:\s*\d+%$", "", sentence.strip()) # 신뢰도 부분 제거
         sentence = sentence.strip()
         return sentence
 
@@ -317,7 +331,7 @@ class ChatBot:
                         for r in table_results :
                             r = ''.join(r)
                             rrr = rrr+'\n'+r
-                            table_ocr_results.append(rrr)
+                        table_ocr_results.append(rrr)
         results = reader.readtext(result, detail=0)
         rr = ''
         for r in results :

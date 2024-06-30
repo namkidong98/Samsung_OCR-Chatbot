@@ -9,6 +9,7 @@ services:
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     deploy:
       resources:
         reservations:
@@ -19,8 +20,7 @@ services:
       test: ["CMD-SHELL", "test -f /root/.ollama/models/manifests/registry.ollama.ai/library/EEVE-Korean-10.8B/latest || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 20
-      start_period: 100s
+      retries: 25
 
   streamlit-app:
     image: kidong98/samsung-rag
@@ -32,6 +32,7 @@ services:
     runtime: nvidia
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
     deploy:
       resources:
         reservations:
