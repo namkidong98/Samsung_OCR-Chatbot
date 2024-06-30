@@ -21,7 +21,7 @@
 <br>
 
 ## Pipeline
-<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/a1b28006-2f16-4f35-b2ce-99c9cc86d139">
+<img width=800 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/8cb0dc6b-eef6-46c6-93ba-fbca5546324c">
 
 <br><br>
 
@@ -32,7 +32,14 @@
 <br><br>
 
 ## 시연 영상
+### PDF 파일 기반 RAG
 https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/7a8d697c-371b-491b-b8be-9fce3030795d
+
+<br>
+
+### Image 파일 기반 RAG
+
+https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/497cdcee-f351-4bd4-969e-c92994500a6e
 
 <br><br>
 
