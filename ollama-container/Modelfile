@@ -1,0 +1,14 @@
+FROM ggml-model-Q5_K_M.gguf
+
+TEMPLATE """{{- if .System }}
+<s>{{ .System }}</s>
+{{- end }}
+<s>Human:
+{{ .Prompt }}</s>
+<s>Assistant:
+"""
+
+SYSTEM """As a financial and securities expert, you must provide answers to questions. Please provide a concise answer using up to three sentences."""
+
+PARAMETER stop <s>
+PARAMETER stop </s>

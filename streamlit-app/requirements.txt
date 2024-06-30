@@ -1,0 +1,13 @@
+streamlit
+streamlit-chat
+langchain
+langchain-community
+pypdf
+fastembed
+chardet
+chromadb
+transformers
+sentence-transformers
+rank_bm25
+easyocr
+opencv-python-headless
