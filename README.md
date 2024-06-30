@@ -1,6 +1,12 @@
 # Samsung_OCR-Chatbot
 삼성증권 과제_OCR 챗봇 서비스 개발
 
+## Branch 설명
+1. <a href="https://github.com/namkidong98/Samsung_OCR-Chatbot">main</a> : 최종 제출 자료
+2. <a href="https://github.com/namkidong98/Samsung_OCR-Chatbot/tree/docker-compose">docker-compose</a> : Docker-Compose를 이용한 구현, Ollama에서 Inference시 오류 발생
+
+<br>
+
 ## 과제 설명
 
 - 상황설명
@@ -47,7 +53,7 @@ https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/497cdcee-f35
 
 1. Git Clone
 ```
-git clone https://github.com/namkidong98/Samsung_OCR-Chatbot.git
+git clone -b docker-compose https://github.com/namkidong98/Samsung_OCR-Chatbot.git
 cd Samsung_OCR-Chatbot
 ```
 
@@ -74,9 +80,9 @@ python embed_download.py
 
 6. Ollama를 실행한 상태에서 llm_rag의 BASE_URL 설정
 ```
-# BASE_URL = "http://ollama-container:11434" # Ollama-Docker를 사용한 docker-compose의 경우
+BASE_URL = "http://ollama-container:11434" # Ollama-Docker를 사용한 docker-compose의 경우
 # BASE_URL = "https://f9db-211-184-186-6.ngrok-free.app" # Ngrok으로 Colab 등의 GPU 서버에서 Ollama를 구동한 경우
-BASE_URL = "https://localhost:11434" # Local에서 Ollama를 구동한 경우
+# BASE_URL = "https://localhost:11434" # Local에서 Ollama를 구동한 경우
 ```
 
 7. streamlit 실행
