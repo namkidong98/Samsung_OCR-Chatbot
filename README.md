@@ -8,7 +8,8 @@
 <br>
 
 ## Pipeline
-<img width=1000 src="https://github.com/namkidong98/Samsung_OCR-Chatbot/assets/113520117/8cb0dc6b-eef6-46c6-93ba-fbca5546324c">
+<img width=1000 src="https://github.com/user-attachments/assets/ee2046aa-e093-44df-a745-d18d3b688fa1">
+
 
 <br><br>
 
