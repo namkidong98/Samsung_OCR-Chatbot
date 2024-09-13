@@ -32,8 +32,8 @@
     - Langchain을 기반으로 ChromaDB를 vectorDB로 사용하는 DPR 구조 설계
     - RAG 성능 향상을 위한 3가지 방법론 도입
         - Query Enhancement : Query LLM을 이용하여 Query Expansion을 적용(기존 query의 명료화, 다양화를 담당)
-        - Retriever Enhancement : Re2G 논문을 참조하여 기존 DPR Retriever에 BM25 Retriever를 추가
-        - Generator Enhancement : Re2G 논문의 Reranker 도입 아이디어를 변형하여 DPR, BM25로 검색한 Document로 응답을 생성하고 LLM에게 기존 Query에 적합한 응답을 선정하게 하는 구조(Answer-Reranking) 
+        - Retriever Enhancement : Re2G 논문을 참조하여 기존 Dense Retriever에 Sparse Retriever(BM25)를 추가
+        - Generator Enhancement : Re2G 논문의 Reranker 도입 아이디어를 변형하여 Retriever로 검색한 Document로 응답을 생성하고 LLM에게 기존 Query에 적합한 응답을 선정하게 하는 구조(Answer-Reranking) 
 3. PDF Table Extraction & Preprocessing
     - PyMuPDF, Tabular, Unstructured, PyMuPDF4LLM, Pdfplumber, PyPDF를 비교하며 증권 보고서 PDF의 테이블 데이터의 추출에 가장 적합한 라이브러리 선정(PyPDF)
     - PyPDF로 추출된 테이블 데이터를 텍스트 데이터와 분리하여 Document로 생성하기 위한 전처리 코드 작성
